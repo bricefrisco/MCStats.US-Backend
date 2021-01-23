@@ -31,6 +31,9 @@ public class UserController {
     public RegistrationResponse register(@RequestBody RegistrationRequest request) {
         if (!request.isValid()) throw new RuntimeException(INVALID_REGISTRATION);
 
+        User user = userRepository.getUserByEIgnoreCase(request.getEmail());
+        if (user != null) throw new RuntimeException("Email already exists.");
+
         String email = request.getEmail().toLowerCase();
         userRepository.save(new User(email, bCryptPasswordEncoder.encode(request.getPassword())));
 

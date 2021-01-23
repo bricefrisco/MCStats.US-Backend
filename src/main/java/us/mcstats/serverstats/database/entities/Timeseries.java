@@ -23,6 +23,7 @@ public class Timeseries {
 
     @Getter
     @Setter
+    @ToString
     public static class CompositeKey implements Serializable {
         @Field("n")
         private String name; // Name of server
