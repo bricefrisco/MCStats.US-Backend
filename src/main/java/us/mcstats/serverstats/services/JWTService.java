@@ -15,16 +15,21 @@ public class JWTService {
     private String jwtSecretKey;
     private String jwtIssuer;
     private long jwtExpiration;
+    private long refreshTokenExpiration;
 
     @PostConstruct
     public void init() {
         algorithm = Algorithm.HMAC256(jwtSecretKey);
     }
 
-    public String validateJWTAndGetUsername(String jwt) {
+    public String validateJWTAndGetUsername(String jwt, boolean allowExpired) {
         if (jwt == null || jwt.isEmpty()) throw new RuntimeException("Missing authorization token.");
         if (!jwt.startsWith("Bearer ")) throw new RuntimeException("Token missing 'Bearer' prefix.");
         jwt = jwt.replace("Bearer ", "");
+        if (allowExpired) {
+            return JWT.require(algorithm).acceptExpiresAt(refreshTokenExpiration).build().verify(jwt).getSubject();
+        }
+
         return JWT.require(algorithm).build().verify(jwt).getSubject();
     }
 
@@ -37,7 +42,7 @@ public class JWTService {
     }
 
     public boolean isAnAdmin(String jwt) {
-        String user = validateJWTAndGetUsername(jwt);
+        String user = validateJWTAndGetUsername(jwt, false);
         if (user == null) throw new RuntimeException("Token has no subject.");
         return user.equals("test@test.com"); // TODO: User roles
     }
@@ -55,5 +60,10 @@ public class JWTService {
     @Value("${jwt.expiration}")
     public void setJwtExpiration(long jwtExpiration) {
         this.jwtExpiration = jwtExpiration;
+    }
+
+    @Value("${jwt.refresh-token-expiration}")
+    public void setRefreshTokenExpiration(long refreshTokenExpiration) {
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
 }

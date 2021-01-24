@@ -11,4 +11,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RegistrationResponse {
     private String jwt;
+    private String refreshToken;
 }

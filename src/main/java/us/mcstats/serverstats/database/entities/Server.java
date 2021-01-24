@@ -17,4 +17,7 @@ public class Server {
 
     @Field(name = "a")
     private String address;
+
+    @Field(name = "i")
+    private String image;
 }

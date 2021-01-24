@@ -29,7 +29,7 @@ public class Pinger {
     public void init() throws IOException {
         List<Server> servers = serverRepository.findAll();
         for (Server server : servers) {
-            Thread thread = new PingerThread(server.getName(), server.getAddress(), timeseriesRepository);
+            Thread thread = new PingerThread(server.getName(), server.getAddress(), timeseriesRepository, serverRepository);
             threads.put(server.getName(), thread);
             thread.start();
         }
@@ -45,7 +45,7 @@ public class Pinger {
             return;
         }
 
-        thread = new PingerThread(server.getName(), server.getAddress(), timeseriesRepository);
+        thread = new PingerThread(server.getName(), server.getAddress(), timeseriesRepository, serverRepository);
         threads.put(server.getName(), thread);
         thread.start();
 

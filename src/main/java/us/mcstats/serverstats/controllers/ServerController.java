@@ -2,6 +2,9 @@ package us.mcstats.serverstats.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +30,16 @@ public class ServerController {
         this.pinger = pinger;
     }
 
+    @GetMapping("/servers")
+    public Page<Server> getServers(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int pageSize) {
+        if (page < 0) throw new RuntimeException("Page must be greater than or equal to 0.");
+        if (pageSize < 1) throw new RuntimeException("Page size must be greater than or equal to 1.");
+        if (pageSize > 100) throw new RuntimeException("Page size must be less than or equal to 100.");
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return serverRepository.findAll(pageable);
+    }
+
     @PostMapping("/servers")
     public ResponseEntity<String> addServer(@RequestHeader("Authorization") String jwt, @RequestBody AddServerRequest request) {
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
@@ -35,8 +48,8 @@ public class ServerController {
         Server server = serverRepository.findByNameIgnoreCase(request.getName());
         if (server != null) throw new RuntimeException("Server with name '" + request.getName() + "' already exists!");
 
-        server = new Server(request.getName(), request.getAddress());
-        serverRepository.save(new Server(request.getName(), request.getAddress()));
+        server = new Server(request.getName(), request.getAddress(), null);
+        serverRepository.save(server);
         pinger.addThread(server);
         return new ResponseEntity<>("Successfully added server '" + request.getName() + "'", HttpStatus.CREATED);
     }

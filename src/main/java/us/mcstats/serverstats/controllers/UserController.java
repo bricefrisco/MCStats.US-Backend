@@ -6,11 +6,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import us.mcstats.serverstats.database.entities.User;
 import us.mcstats.serverstats.database.repository.UserRepository;
-import us.mcstats.serverstats.models.users.LoginRequest;
-import us.mcstats.serverstats.models.users.LoginResponse;
-import us.mcstats.serverstats.models.users.RegistrationRequest;
-import us.mcstats.serverstats.models.users.RegistrationResponse;
+import us.mcstats.serverstats.models.users.*;
 import us.mcstats.serverstats.services.JWTService;
+
+import java.util.UUID;
 
 @RestController
 public class UserController {
@@ -20,6 +19,7 @@ public class UserController {
 
     private static final String INVALID_REGISTRATION = "Registration request is invalid.";
     private static final String INVALID_USERNAME_PASSWORD = "Invalid username or password.";
+    private static final String INVALID_REQUEST = "Invalid request.";
 
     public UserController(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JWTService jwtService) {
         this.userRepository = userRepository;
@@ -35,9 +35,17 @@ public class UserController {
         if (user != null) throw new RuntimeException("Email already exists.");
 
         String email = request.getEmail().toLowerCase();
-        userRepository.save(new User(email, bCryptPasswordEncoder.encode(request.getPassword())));
 
-        return new RegistrationResponse(jwtService.generateJWT(email));
+        String jwt = jwtService.generateJWT(email);
+        String refreshToken = UUID.randomUUID().toString();
+
+        user = new User();
+        user.setE(email);
+        user.setP(bCryptPasswordEncoder.encode(request.getPassword()));
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return new RegistrationResponse(jwt, refreshToken);
     }
 
     @PostMapping("/login")
@@ -52,6 +60,33 @@ public class UserController {
             throw new RuntimeException(INVALID_USERNAME_PASSWORD);
         }
 
-        return new LoginResponse(jwtService.generateJWT(request.getEmail()));
+        String jwt = jwtService.generateJWT(user.getE());
+        String refreshToken = UUID.randomUUID().toString();
+
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return new LoginResponse(jwt, refreshToken);
+    }
+
+    @PostMapping("/refresh")
+    public RefreshTokenResponse refresh(@RequestBody RefreshTokenRequest request) {
+        if (!request.isValid()) throw new RuntimeException(INVALID_REQUEST);
+
+        String email = jwtService.validateJWTAndGetUsername(request.getJwt(), true);
+        if (email == null || email.isEmpty()) throw new RuntimeException(INVALID_REQUEST);
+
+        User user = userRepository.getUserByEIgnoreCase(email);
+        if (user == null) throw new RuntimeException(INVALID_REQUEST);
+
+        if (!user.getRefreshToken().equals(request.getRefreshToken())) throw new RuntimeException("Invalid refresh token.");
+
+        String jwt = jwtService.generateJWT(user.getE());
+        String refreshToken = UUID.randomUUID().toString();
+
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return new RefreshTokenResponse(jwt, refreshToken);
     }
 }
