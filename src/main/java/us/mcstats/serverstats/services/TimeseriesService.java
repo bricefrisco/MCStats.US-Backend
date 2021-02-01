@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
-import us.mcstats.serverstats.models.mongo.MongoResponse;
-import us.mcstats.serverstats.models.mongo.PlayerData;
+import us.mcstats.serverstats.models.mongo.timeseries.MongoResponse;
+import us.mcstats.serverstats.models.mongo.timeseries.PlayerData;
 import us.mcstats.serverstats.models.timeseries.TimeseriesDto;
 
 import java.sql.Timestamp;

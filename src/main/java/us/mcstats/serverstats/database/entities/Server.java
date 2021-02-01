@@ -20,4 +20,13 @@ public class Server {
 
     @Field(name = "i")
     private String image;
+
+    @Field(name = "d")
+    private String description;
+
+    @Field(name = "p")
+    private Integer players;
+
+    @Field(name = "pm")
+    private Integer maxPlayers;
 }

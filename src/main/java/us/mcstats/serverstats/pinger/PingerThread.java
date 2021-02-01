@@ -17,13 +17,11 @@ public class PingerThread extends Thread {
 
     private final ServerRepository serverRepository;
     private final TimeseriesRepository repository;
-    private final String serverName;
-    private final String serverAddress;
+    private final Server server;
 
-    public PingerThread(String serverName, String serverAddress, TimeseriesRepository timeseriesRepository, ServerRepository serverRepository) {
-        LOGGER.info("Thread started for server " + serverName + " - " + serverAddress);
-        this.serverName = serverName;
-        this.serverAddress = serverAddress;
+    public PingerThread(Server server, TimeseriesRepository timeseriesRepository, ServerRepository serverRepository) {
+        LOGGER.info("Thread started for server " + server.getName() + " - " + server.getAddress());
+        this.server = server;
         this.repository = timeseriesRepository;
         this.serverRepository = serverRepository;
     }
@@ -34,35 +32,35 @@ public class PingerThread extends Thread {
         LOGGER.info("Sleeping initially for " + rand + " seconds");
         Thread.sleep(rand * 1000);
 
-        boolean updatedImage = false;
+        boolean updatedMetaData = false;
 
         while (true) {
             try {
-                MCPingResponse response = MCPing.getPing(serverAddress);
+                MCPingResponse response = MCPing.getPing(server.getAddress());
                 Timeseries timeseries = new Timeseries();
                 Timeseries.CompositeKey key = new Timeseries.CompositeKey();
-                key.setName(serverName);
+                key.setName(server.getName());
                 key.setTimestamp(new Timestamp(System.currentTimeMillis()));
                 timeseries.setId(key);
                 timeseries.setPlayersOnline(response.getPlayers().getOnline());
 
-                LOGGER.info("Pinged server " + serverName + " (players online: " + response.getPlayers().getOnline() + ") saving timeseries: " + timeseries.toString());
+                LOGGER.info("Pinged server " + server.getName() + " (players online: " + response.getPlayers().getOnline() + ") saving timeseries: " + timeseries.toString());
 
-                if (!updatedImage) {
-                    updatedImage = true;
 
-                    LOGGER.info("Updating image for server '" + serverName + "'");
-
-                    Server server = serverRepository.findByNameIgnoreCase(serverName);
-                    if (server == null) continue;
+                if (!updatedMetaData) {
+                    LOGGER.info("Updating meta data for server '" + server.getName() + "'");
                     server.setImage(response.getFavicon());
-
-                    serverRepository.save(server);
+                    server.setDescription(response.getDescription().getStrippedText());
+                    updatedMetaData = true;
                 }
 
+                server.setPlayers(response.getPlayers().getOnline());
+                server.setMaxPlayers(response.getPlayers().getMax());
+
+                serverRepository.save(server);
                 repository.save(timeseries);
             } catch (Exception e) {
-                LOGGER.info("Failed to ping " + serverAddress + " - " + e.getMessage());
+                LOGGER.info("Failed to ping " + server.getAddress() + " - " + e.getMessage());
             } finally {
                 Thread.sleep(60 * 1000);
             }

@@ -21,6 +21,9 @@ public class User {
     @Indexed
     private String p; // User password (bCrypt)
 
+    @Field("ro")
+    private String role;
+
     @Field("r")
     private String refreshToken;
 }

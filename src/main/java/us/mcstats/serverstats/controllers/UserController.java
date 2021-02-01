@@ -1,6 +1,7 @@
 package us.mcstats.serverstats.controllers;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,7 @@ import us.mcstats.serverstats.services.JWTService;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin(origins={"http://localhost:3000"})
 public class UserController {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -36,7 +38,7 @@ public class UserController {
 
         String email = request.getEmail().toLowerCase();
 
-        String jwt = jwtService.generateJWT(email);
+        String jwt = jwtService.generateJWT(email, "user");
         String refreshToken = UUID.randomUUID().toString();
 
         user = new User();
@@ -60,7 +62,7 @@ public class UserController {
             throw new RuntimeException(INVALID_USERNAME_PASSWORD);
         }
 
-        String jwt = jwtService.generateJWT(user.getE());
+        String jwt = jwtService.generateJWT(user.getE(), user.getRole());
         String refreshToken = UUID.randomUUID().toString();
 
         user.setRefreshToken(refreshToken);
@@ -81,7 +83,7 @@ public class UserController {
 
         if (!user.getRefreshToken().equals(request.getRefreshToken())) throw new RuntimeException("Invalid refresh token.");
 
-        String jwt = jwtService.generateJWT(user.getE());
+        String jwt = jwtService.generateJWT(user.getE(), user.getRole());
         String refreshToken = UUID.randomUUID().toString();
 
         user.setRefreshToken(refreshToken);

@@ -8,7 +8,6 @@ import us.mcstats.serverstats.database.repository.ServerRepository;
 import us.mcstats.serverstats.database.repository.TimeseriesRepository;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,10 +25,10 @@ public class Pinger {
     }
 
     @PostConstruct
-    public void init() throws IOException {
+    public void init() {
         List<Server> servers = serverRepository.findAll();
         for (Server server : servers) {
-            Thread thread = new PingerThread(server.getName(), server.getAddress(), timeseriesRepository, serverRepository);
+            Thread thread = new PingerThread(server, timeseriesRepository, serverRepository);
             threads.put(server.getName(), thread);
             thread.start();
         }
@@ -45,7 +44,7 @@ public class Pinger {
             return;
         }
 
-        thread = new PingerThread(server.getName(), server.getAddress(), timeseriesRepository, serverRepository);
+        thread = new PingerThread(server, timeseriesRepository, serverRepository);
         threads.put(server.getName(), thread);
         thread.start();
 

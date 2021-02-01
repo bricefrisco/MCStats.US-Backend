@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,18 +14,23 @@ import us.mcstats.serverstats.database.repository.ServerRepository;
 import us.mcstats.serverstats.models.servers.AddServerRequest;
 import us.mcstats.serverstats.models.servers.DeleteServerRequest;
 import us.mcstats.serverstats.models.servers.ModifyServerRequest;
+import us.mcstats.serverstats.models.servers.StatsResponse;
 import us.mcstats.serverstats.pinger.Pinger;
 import us.mcstats.serverstats.services.JWTService;
+import us.mcstats.serverstats.services.ServerService;
 
 @RestController
+@CrossOrigin(origins={"http://localhost:3000"})
 public class ServerController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerController.class);
 
+    private final ServerService serverService;
     private final JWTService jwtService;
     private final ServerRepository serverRepository;
     private final Pinger pinger;
 
-    public ServerController(JWTService jwtService, ServerRepository serverRepository, Pinger pinger) {
+    public ServerController(ServerService serverService, JWTService jwtService, ServerRepository serverRepository, Pinger pinger) {
+        this.serverService = serverService;
         this.jwtService = jwtService;
         this.serverRepository = serverRepository;
         this.pinger = pinger;
@@ -36,7 +42,8 @@ public class ServerController {
         if (pageSize < 1) throw new RuntimeException("Page size must be greater than or equal to 1.");
         if (pageSize > 100) throw new RuntimeException("Page size must be less than or equal to 100.");
 
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Sort sort = Sort.by(("players")).descending();
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
         return serverRepository.findAll(pageable);
     }
 
@@ -48,7 +55,10 @@ public class ServerController {
         Server server = serverRepository.findByNameIgnoreCase(request.getName());
         if (server != null) throw new RuntimeException("Server with name '" + request.getName() + "' already exists!");
 
-        server = new Server(request.getName(), request.getAddress(), null);
+        server = new Server();
+        server.setName(request.getName());
+        server.setAddress(request.getAddress());
+
         serverRepository.save(server);
         pinger.addThread(server);
         return new ResponseEntity<>("Successfully added server '" + request.getName() + "'", HttpStatus.CREATED);
@@ -78,6 +88,11 @@ public class ServerController {
         pinger.removeThread(server);
 
         return new ResponseEntity<>("Successfully deleted server '" + request.getName() + "'", HttpStatus.OK);
+    }
+
+    @GetMapping("/stats")
+    public StatsResponse getTotalPlayers() {
+        return new StatsResponse(serverRepository.count(), serverService.fetchTotalPlayers());
     }
 
 

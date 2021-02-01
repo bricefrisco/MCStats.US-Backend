@@ -33,18 +33,27 @@ public class JWTService {
         return JWT.require(algorithm).build().verify(jwt).getSubject();
     }
 
-    public String generateJWT(String email) {
+    public String validateJWTAndGetRole(String jwt) {
+        if (jwt == null || jwt.isEmpty()) throw new RuntimeException("Missing authorization token.");
+        if (!jwt.startsWith("Bearer ")) throw new RuntimeException("Token missing 'Bearer' prefix.");
+        jwt = jwt.replace("Bearer ", "");
+
+        return JWT.require(algorithm).build().verify(jwt).getClaim("role").asString();
+    }
+
+    public String generateJWT(String email, String role) {
         return JWT.create()
                 .withIssuer(jwtIssuer)
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtExpiration))
                 .withSubject(email)
+                .withClaim("role", role)
                 .sign(algorithm);
     }
 
     public boolean isAnAdmin(String jwt) {
-        String user = validateJWTAndGetUsername(jwt, false);
-        if (user == null) throw new RuntimeException("Token has no subject.");
-        return user.equals("test@test.com"); // TODO: User roles
+        String role = validateJWTAndGetRole(jwt);
+        if (role == null) throw new RuntimeException("User has no role.");
+        return role.equals("admin");
     }
 
     @Value("${jwt.secret-key}")

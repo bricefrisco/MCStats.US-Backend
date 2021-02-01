@@ -1,15 +1,16 @@
-package us.mcstats.serverstats.models.mongo;
+package us.mcstats.serverstats.models.mongo.timeseries;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PlayerData {
-    @JsonProperty("_id")
-    private DateId dateId;
-    private int players;
+public class DateId {
+    @JsonProperty("$date")
+    private Timestamp date;
 }
