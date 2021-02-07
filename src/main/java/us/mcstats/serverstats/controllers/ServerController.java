@@ -6,11 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import us.mcstats.serverstats.database.entities.Server;
 import us.mcstats.serverstats.database.repository.ServerRepository;
+import us.mcstats.serverstats.database.repository.TimeseriesRepository;
+import us.mcstats.serverstats.models.GenericResponse;
 import us.mcstats.serverstats.models.servers.AddServerRequest;
 import us.mcstats.serverstats.models.servers.DeleteServerRequest;
 import us.mcstats.serverstats.models.servers.ModifyServerRequest;
@@ -30,12 +30,14 @@ public class ServerController {
     private final ServerService serverService;
     private final JWTService jwtService;
     private final ServerRepository serverRepository;
+    private final TimeseriesRepository timeseriesRepository;
     private final Pinger pinger;
 
-    public ServerController(ServerService serverService, JWTService jwtService, ServerRepository serverRepository, Pinger pinger) {
+    public ServerController(ServerService serverService, JWTService jwtService, ServerRepository serverRepository, TimeseriesRepository timeseriesRepository, Pinger pinger) {
         this.serverService = serverService;
         this.jwtService = jwtService;
         this.serverRepository = serverRepository;
+        this.timeseriesRepository = timeseriesRepository;
         this.pinger = pinger;
     }
 
@@ -62,7 +64,7 @@ public class ServerController {
     }
 
     @PostMapping("/servers")
-    public ResponseEntity<String> addServer(@RequestHeader("Authorization") String jwt, @RequestBody AddServerRequest request) {
+    public GenericResponse addServer(@RequestHeader("Authorization") String jwt, @RequestBody AddServerRequest request) {
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
         if (!request.isValid()) throw new RuntimeException("Invalid server or address.");
 
@@ -75,11 +77,11 @@ public class ServerController {
 
         serverRepository.save(server);
         pinger.addThread(server);
-        return new ResponseEntity<>("Successfully added server '" + request.getName() + "'", HttpStatus.CREATED);
+        return new GenericResponse("Successfully added server '" + request.getName() + "'");
     }
 
     @PutMapping("/servers")
-    public ResponseEntity<String> modifyServer(@RequestHeader("Authorization") String jwt, @RequestBody ModifyServerRequest request) {
+    public GenericResponse modifyServer(@RequestHeader("Authorization") String jwt, @RequestBody ModifyServerRequest request) {
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
         if (!request.isValid()) throw new RuntimeException("Invalid server or address.");
 
@@ -89,19 +91,19 @@ public class ServerController {
         serverRepository.save(server);
         pinger.updateThread(server);
 
-        return new ResponseEntity<>("Successfully modified server '" + request.getName() + "'", HttpStatus.OK);
+        return new GenericResponse("Successfully modified server '" + request.getName() + "'");
     }
 
     @DeleteMapping("/servers")
-    public ResponseEntity<String> deleteServer(@RequestHeader("Authorization") String jwt, @RequestBody DeleteServerRequest request) {
+    public GenericResponse deleteServer(@RequestHeader("Authorization") String jwt, @RequestBody DeleteServerRequest request) {
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
 
-        Server server = getServerIfExists(request.name);
-
+        Server server = getServerIfExists(request.getName());
         serverRepository.delete(server);
+        Long recordsRemoved = timeseriesRepository.deleteRecordsByServerName(request.getName());
         pinger.removeThread(server);
 
-        return new ResponseEntity<>("Successfully deleted server '" + request.getName() + "'", HttpStatus.OK);
+        return new GenericResponse("Successfully deleted server '" + request.getName() + "' and " + recordsRemoved + " records.");
     }
 
     @GetMapping("/stats")
