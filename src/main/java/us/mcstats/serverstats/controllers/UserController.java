@@ -53,8 +53,7 @@ public class UserController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
         if (!request.isValid()) throw new RuntimeException(INVALID_USERNAME_PASSWORD);
-
-
+        
         User user = userRepository.getUserByEIgnoreCase(request.getEmail());
         if (user == null) throw new RuntimeException(INVALID_USERNAME_PASSWORD);
 

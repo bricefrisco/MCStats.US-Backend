@@ -6,14 +6,19 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import us.mcstats.serverstats.database.repository.TimeseriesRepository;
 import us.mcstats.serverstats.models.mongo.timeseries.MongoResponse;
 import us.mcstats.serverstats.models.mongo.timeseries.PlayerData;
 import us.mcstats.serverstats.models.timeseries.TimeseriesDto;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -21,12 +26,15 @@ import java.util.TimeZone;
 public class TimeseriesService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeseriesService.class);
     private static final SimpleDateFormat timestampFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final int MAX_RESULTS = 100;
     private final MongoTemplate mongoTemplate;
+    private final TimeseriesRepository timeseriesRepository;
 
-    public TimeseriesService(MongoTemplate mongoTemplate) {
+    public TimeseriesService(MongoTemplate mongoTemplate, TimeseriesRepository timeseriesRepository) {
         this.mongoTemplate = mongoTemplate;
+        this.timeseriesRepository = timeseriesRepository;
         timestampFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
@@ -93,5 +101,12 @@ public class TimeseriesService {
         }
 
         return timeSeriesList;
+    }
+
+    @Scheduled(fixedRate = 30000)
+    public void purgeOldRecords() {
+        LocalDateTime date = LocalDateTime.now().minusMonths(2);
+        Long numRecordsDeleted = timeseriesRepository.deleteAllRecordsBefore(date);
+        LOGGER.info("Purged " + numRecordsDeleted + " old records.");
     }
 }

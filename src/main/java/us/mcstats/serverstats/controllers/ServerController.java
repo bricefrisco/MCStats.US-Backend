@@ -19,6 +19,9 @@ import us.mcstats.serverstats.pinger.Pinger;
 import us.mcstats.serverstats.services.JWTService;
 import us.mcstats.serverstats.services.ServerService;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @CrossOrigin(origins={"http://localhost:3000"})
 public class ServerController {
@@ -36,6 +39,11 @@ public class ServerController {
         this.pinger = pinger;
     }
 
+    @GetMapping("/server")
+    public Server getServer(@RequestParam String name) {
+        return serverRepository.findByNameIgnoreCase(name);
+    }
+
     @GetMapping("/servers")
     public Page<Server> getServers(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int pageSize) {
         if (page < 0) throw new RuntimeException("Page must be greater than or equal to 0.");
@@ -45,6 +53,12 @@ public class ServerController {
         Sort sort = Sort.by(("players")).descending();
         Pageable pageable = PageRequest.of(page, pageSize, sort);
         return serverRepository.findAll(pageable);
+    }
+
+    @GetMapping("/server-names")
+    public List<String> getServerNames() {
+        List<Server> servers = serverRepository.findAll();
+        return servers.stream().map(Server::getName).sorted().collect(Collectors.toList());
     }
 
     @PostMapping("/servers")
