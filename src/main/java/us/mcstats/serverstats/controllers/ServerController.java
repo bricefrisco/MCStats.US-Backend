@@ -11,10 +11,7 @@ import us.mcstats.serverstats.database.entities.Server;
 import us.mcstats.serverstats.database.repository.ServerRepository;
 import us.mcstats.serverstats.database.repository.TimeseriesRepository;
 import us.mcstats.serverstats.models.GenericResponse;
-import us.mcstats.serverstats.models.servers.AddServerRequest;
-import us.mcstats.serverstats.models.servers.DeleteServerRequest;
-import us.mcstats.serverstats.models.servers.ModifyServerRequest;
-import us.mcstats.serverstats.models.servers.StatsResponse;
+import us.mcstats.serverstats.models.servers.*;
 import us.mcstats.serverstats.pinger.Pinger;
 import us.mcstats.serverstats.services.JWTService;
 import us.mcstats.serverstats.services.ServerService;
@@ -92,6 +89,16 @@ public class ServerController {
         pinger.updateThread(server);
 
         return new GenericResponse("Successfully modified server '" + request.getName() + "'");
+    }
+
+    @PutMapping("/refresh")
+    public GenericResponse refreshServer(@RequestHeader("Authorization") String jwt, @RequestBody RefreshServerRequest request) {
+        if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
+
+        Server server = getServerIfExists(request.getName());
+        pinger.updateThread(server);
+
+        return new GenericResponse("Successfully refreshed thread for server '" + request.getName() + "'");
     }
 
     @DeleteMapping("/servers")
