@@ -11,7 +11,10 @@ import us.mcstats.serverstats.services.TimeseriesService;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -27,9 +30,12 @@ public class TimeseriesController {
 
     @GetMapping("/timeseries")
     public List<TimeseriesDto> fetchTimeseries(@RequestParam String serverName,
-                                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lt,
-                                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime gt) {
+                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssX") Date lt,
+                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssX") Date gt) {
+//        ZonedDateTime zlt = lt.atZone(ZoneId.of("UTC"));
+//        ZonedDateTime zgt = gt.atZone(ZoneId.of("UTC"));
         LOGGER.info("GET /timeseries - serverName:" + serverName + ", lt:" + lt + ", gt:" + gt);
+//        LOGGER.info("zlt: " + zlt + ", zgt: " + zgt);
 
         List<TimeseriesDto> timeseriesList = new ArrayList<>();
 
@@ -40,7 +46,7 @@ public class TimeseriesController {
             if (attempt > 3) {
                 break;
             }
-            timeseriesList = timeseriesService.fetchTimeSeries(serverName, Timestamp.valueOf(lt), Timestamp.valueOf(gt));
+            timeseriesList = timeseriesService.fetchTimeSeries(serverName, new Timestamp(lt.getTime()), new Timestamp(gt.getTime()));
         }
 
         return timeseriesList;
