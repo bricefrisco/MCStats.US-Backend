@@ -5,9 +5,9 @@ workflows:
   main:
     jobs:
       - build:
-        filters:
-          branches:
-            only: master
+          filters:
+            branches:
+              only: master
 
 jobs:
   build:
@@ -20,12 +20,12 @@ jobs:
       - checkout
 
       - setup_remote_docker:
-        version: 19.03.13
+          version: 19.03.13
 
       - run:
-        name: Package JAR
-        command: mvn clean package
+          name: Package JAR
+          command: mvn clean package
 
       - run:
-        name: Deploy to server
-        command: scp -o StrictHostKeyChecking=no -r /home/circleci/application/target/*.jar $HOST:~/application/mcstats-us-backend
+          name: Deploy to server
+          command: scp -o StrictHostKeyChecking=no -r /home/circleci/application/target/*.jar $HOST:~/application/mcstats-us-backend
