@@ -1,5 +1,7 @@
 package us.mcstats.serverstats.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +17,15 @@ import java.util.UUID;
 @RestController
 @CrossOrigin(origins={"http://localhost:3000"})
 public class UserController {
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final JWTService jwtService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     private static final String INVALID_REGISTRATION = "Registration request is invalid.";
     private static final String INVALID_USERNAME_PASSWORD = "Invalid username or password.";
     private static final String INVALID_REQUEST = "Invalid request.";
+
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JWTService jwtService;
 
     public UserController(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JWTService jwtService) {
         this.userRepository = userRepository;
@@ -31,6 +35,7 @@ public class UserController {
 
     @PostMapping("/register")
     public RegistrationResponse register(@RequestBody RegistrationRequest request) {
+        LOGGER.info("POST /register - email:" + request.getEmail());
         if (!request.isValid()) throw new RuntimeException(INVALID_REGISTRATION);
 
         User user = userRepository.getUserByEIgnoreCase(request.getEmail());
@@ -52,6 +57,8 @@ public class UserController {
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
+        LOGGER.info("POST /login - email:" + request.getEmail());
+
         if (!request.isValid()) throw new RuntimeException(INVALID_USERNAME_PASSWORD);
         
         User user = userRepository.getUserByEIgnoreCase(request.getEmail());
@@ -72,6 +79,7 @@ public class UserController {
 
     @PostMapping("/refresh")
     public RefreshTokenResponse refresh(@RequestBody RefreshTokenRequest request) {
+        LOGGER.info("POST /refresh");
         if (!request.isValid()) throw new RuntimeException(INVALID_REQUEST);
 
         String email = jwtService.validateJWTAndGetUsername(request.getJwt(), true);

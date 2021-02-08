@@ -39,7 +39,6 @@ public class ServerService {
 
     public long fetchTotalPlayers() {
         Document document = mongoTemplate.executeCommand(SUM_PLAYERS_QUERY);
-        LOGGER.info(document.toJson());
         try {
             MongoTotalPlayersResponse response = MAPPER.readValue(document.toJson(), MongoTotalPlayersResponse.class);
             return response.getCursor().getTotalPlayersList().get(0).getTotalPlayers();

@@ -40,11 +40,13 @@ public class ServerController {
 
     @GetMapping("/server")
     public Server getServer(@RequestParam String name) {
+        LOGGER.info("GET /server - name:" + name);
         return serverRepository.findByNameIgnoreCase(name);
     }
 
     @GetMapping("/servers")
     public Page<Server> getServers(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int pageSize) {
+        LOGGER.info("GET /servers - page:" + page + ", pageSize:" + pageSize);
         if (page < 0) throw new RuntimeException("Page must be greater than or equal to 0.");
         if (pageSize < 1) throw new RuntimeException("Page size must be greater than or equal to 1.");
         if (pageSize > 100) throw new RuntimeException("Page size must be less than or equal to 100.");
@@ -56,12 +58,14 @@ public class ServerController {
 
     @GetMapping("/server-names")
     public List<String> getServerNames() {
+        LOGGER.info("GET /server-names");
         List<Server> servers = serverRepository.findAll();
         return servers.stream().map(Server::getName).sorted().collect(Collectors.toList());
     }
 
     @PostMapping("/servers")
     public GenericResponse addServer(@RequestHeader("Authorization") String jwt, @RequestBody AddServerRequest request) {
+        LOGGER.info("POST /servers - " + request);
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
         if (!request.isValid()) throw new RuntimeException("Invalid server or address.");
 
@@ -79,6 +83,7 @@ public class ServerController {
 
     @PutMapping("/servers")
     public GenericResponse modifyServer(@RequestHeader("Authorization") String jwt, @RequestBody ModifyServerRequest request) {
+        LOGGER.info("PUT /servers - " + request);
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
         if (!request.isValid()) throw new RuntimeException("Invalid server or address.");
 
@@ -91,8 +96,9 @@ public class ServerController {
         return new GenericResponse("Successfully modified server '" + request.getName() + "'");
     }
 
-    @PutMapping("/refresh")
+    @PutMapping("/servers/refresh")
     public GenericResponse refreshServer(@RequestHeader("Authorization") String jwt, @RequestBody RefreshServerRequest request) {
+        LOGGER.info("PUT /servers/refresh - " + request);
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
 
         Server server = getServerIfExists(request.getName());
@@ -103,6 +109,7 @@ public class ServerController {
 
     @DeleteMapping("/servers")
     public GenericResponse deleteServer(@RequestHeader("Authorization") String jwt, @RequestBody DeleteServerRequest request) {
+        LOGGER.info("DELETE /servers - " + request);
         if (!jwtService.isAnAdmin(jwt)) throw new RuntimeException("Unauthorized.");
 
         Server server = getServerIfExists(request.getName());
@@ -115,6 +122,7 @@ public class ServerController {
 
     @GetMapping("/stats")
     public StatsResponse getTotalPlayers() {
+        LOGGER.info("GET /stats");
         return new StatsResponse(serverRepository.count(), serverService.fetchTotalPlayers());
     }
 

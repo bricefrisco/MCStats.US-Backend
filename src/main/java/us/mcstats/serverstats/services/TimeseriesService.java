@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -76,6 +75,8 @@ public class TimeseriesService {
 
         // Time-series interval calculated by difference in milliseconds divided by the max results we would like
         long interval = ms / MAX_RESULTS;
+
+        LOGGER.info("Interval in seconds: " + interval / 1000);
 
         Document document = mongoTemplate.executeCommand(
                 String.format(
