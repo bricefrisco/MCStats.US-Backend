@@ -41,6 +41,7 @@ public class ServerService {
         Document document = mongoTemplate.executeCommand(SUM_PLAYERS_QUERY);
         try {
             MongoTotalPlayersResponse response = MAPPER.readValue(document.toJson(), MongoTotalPlayersResponse.class);
+            if (response.getCursor().getTotalPlayersList().size() == 0) return 0;
             return response.getCursor().getTotalPlayersList().get(0).getTotalPlayers();
         } catch (JsonProcessingException e) {
             LOGGER.error("Error parsing JSON document", e);
