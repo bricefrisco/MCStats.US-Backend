@@ -11,7 +11,7 @@
 
 	<groupId>us.mcstats</groupId>
 	<artifactId>server-stats</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>server-stats</name>
 
 	<description>

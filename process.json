@@ -1,0 +1,27 @@
+{
+  "apps": [
+    {
+      "name": "mcstats-us-backend",
+      "cwd": ".",
+      "script": "/usr/bin/java",
+      "args": [
+        "-jar",
+        "~/applications/mcstats-us-backend/server-stats-0.0.1.jar"
+      ],
+      "watch": [
+        "~/applications/mcstats-us-backend/server-stats-0.0.1.jar"
+      ],
+      "env": {
+        "jwt.secret-key": "changeme",
+        "jwt.issuer": "mcstats.us",
+        "jwt.expiration": "900000",
+        "jwt.refresh-token-expiration": "86400",
+        "server.servlet.context-path": "/api"
+      },
+      "node_args": [],
+      "log_date_format": "MM-DD-YYYY HH:mm Z",
+      "exec_interpreter": "",
+      "exec_mode": "fork"
+    }
+  ]
+}

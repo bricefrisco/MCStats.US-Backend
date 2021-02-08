@@ -1,0 +1,30 @@
+version: 2.1
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
+
+build:
+  docker:
+    - image: circleci/openjdk:11-jdk-stretch
+
+  working_directory: ~/application
+
+  steps:
+    - checkout
+
+    - setup_remote_docker:
+        version: 19.03.13
+
+    - run:
+        name: Package JAR
+        command: mvn clean package
+
+    - run:
+        name: Deploy to server
+        command: scp -o StrictHostKeyChecking=no -r /home/circleci/application/target/*.jar $HOST:~/application/mcstats-us-backend
