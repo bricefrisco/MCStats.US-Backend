@@ -15,7 +15,7 @@ import us.mcstats.serverstats.services.JWTService;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin(origins={"http://localhost:3000"})
+@CrossOrigin(origins="*")
 public class UserController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 

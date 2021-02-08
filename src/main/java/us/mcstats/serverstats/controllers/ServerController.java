@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins={"http://localhost:3000"})
+@CrossOrigin(origins="*")
 public class ServerController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerController.class);
 
