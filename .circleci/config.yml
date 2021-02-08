@@ -28,4 +28,4 @@ jobs:
 
       - run:
           name: Deploy to server
-          command: scp -o StrictHostKeyChecking=no -r /home/circleci/applications/target/*.jar $HOST:~/application/mcstats-us-backend
+          command: scp -o StrictHostKeyChecking=no -r /home/circleci/applications/target/* $HOST:~/application/mcstats-us-backend
