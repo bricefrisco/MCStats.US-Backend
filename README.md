@@ -2,7 +2,7 @@
 	<img src="https://i.imgur.com/hprX8oH.png">
 </p>
 
-# MCStats : front-end
+# MCStats : back-end
 
 Realtime Minecraft server player counter. View both realtime and historical player counts of many of the most popular Minecraft servers. Heavily inspired by [Minetrack](https://github.com/Cryptkeeper/Minetrack 'Minetrack').
 
