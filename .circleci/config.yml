@@ -32,7 +32,7 @@ jobs:
 
       - run:
           name: Convert to PKCS12
-          command: openssl pkcs12 -export -out src/main/resources/key.p12 -inkey key.pem -in cert.pem -passout pass:$PKCS12_PASS -name shopdb
+          command: openssl pkcs12 -export -out src/main/resources/key.p12 -inkey key.pem -in cert.pem -passout pass:$PKCS12_PASS -name mcstats
 
       - run:
           name: Package JAR
