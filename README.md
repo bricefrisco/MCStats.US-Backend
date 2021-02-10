@@ -18,7 +18,7 @@ The ultimate goal is to count half a million Minecraft players during peak hours
 ### Libraries and Frameworks: Back-end
 
 - Written with Java and [Spring Boot](https://spring.io/projects/spring-boot 'Spring Boot').
-- Data is stored in [MongoDB](https://www.mongodb.com/ 'MongoDB').
+- Data is stored in [PostgreSQL](https://www.postgresql.org/ 'PostgreSQL') and utilizes the [TimescaleDB](https://www.timescale.com/ 'TimescaleDB') addon.
 - Data is gathered by using [minecraft-server-ping](https://github.com/lucaazalim/minecraft-server-ping 'minecraft-server-ping').
 
 ### Libraries and Frameworks: Front-end
