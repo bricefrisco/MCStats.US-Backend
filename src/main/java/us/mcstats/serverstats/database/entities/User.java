@@ -1,29 +1,29 @@
 package us.mcstats.serverstats.database.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Field;
+import lombok.*;
+import javax.persistence.*;
 
-import java.sql.Timestamp;
-
+@Entity
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@ToString
+@Table(name = "users")
 public class User {
+
     @Id
-    private String e; // User email
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @Indexed
-    private String p; // User password (bCrypt)
+    @Column(name = "email")
+    private String email; // User email
 
-    @Field("ro")
+    @Column(name = "password")
+    private String password; // User password (bCrypt)
+
+    @Column(name = "role")
     private String role;
 
-    @Field("r")
+    @Column(name = "refresh_token")
     private String refreshToken;
+
 }
