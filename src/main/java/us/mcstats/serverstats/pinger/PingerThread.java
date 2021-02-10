@@ -38,11 +38,11 @@ public class PingerThread extends Thread {
             try {
                 MCPingResponse response = MCPing.getPing(server.getAddress());
                 Timeseries timeseries = new Timeseries();
-                Timeseries.CompositeKey key = new Timeseries.CompositeKey();
-                key.setName(server.getName());
-                key.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                Timeseries.CompositeId key = new Timeseries.CompositeId();
+                key.setServerName(server.getName());
+                key.setTime(new Timestamp(System.currentTimeMillis()));
                 timeseries.setId(key);
-                timeseries.setPlayersOnline(response.getPlayers().getOnline());
+                timeseries.setNumPlayersOnline(response.getPlayers().getOnline());
 
                 LOGGER.info("Pinged server " + server.getName() + " (players online: " + response.getPlayers().getOnline() + ") saving timeseries: " + timeseries.toString());
 
@@ -55,7 +55,7 @@ public class PingerThread extends Thread {
                 }
 
                 server.setPlayers(response.getPlayers().getOnline());
-                server.setMaxPlayers(response.getPlayers().getMax());
+//                server.setMaxPlayers(response.getPlayers().getMax());
 
                 serverRepository.save(server);
                 repository.save(timeseries);
