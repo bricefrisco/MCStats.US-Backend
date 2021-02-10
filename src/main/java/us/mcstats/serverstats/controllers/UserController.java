@@ -38,7 +38,7 @@ public class UserController {
         LOGGER.info("POST /register - email:" + request.getEmail());
         if (!request.isValid()) throw new RuntimeException(INVALID_REGISTRATION);
 
-        User user = userRepository.getUserByEIgnoreCase(request.getEmail());
+        User user = userRepository.getUserByEmailIgnoreCase(request.getEmail());
         if (user != null) throw new RuntimeException("Email already exists.");
 
         String email = request.getEmail().toLowerCase();
@@ -47,8 +47,8 @@ public class UserController {
         String refreshToken = UUID.randomUUID().toString();
 
         user = new User();
-        user.setE(email);
-        user.setP(bCryptPasswordEncoder.encode(request.getPassword()));
+        user.setEmail(email);
+        user.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
@@ -61,14 +61,14 @@ public class UserController {
 
         if (!request.isValid()) throw new RuntimeException(INVALID_USERNAME_PASSWORD);
         
-        User user = userRepository.getUserByEIgnoreCase(request.getEmail());
+        User user = userRepository.getUserByEmailIgnoreCase(request.getEmail());
         if (user == null) throw new RuntimeException(INVALID_USERNAME_PASSWORD);
 
-        if (!bCryptPasswordEncoder.matches(request.getPassword(), user.getP())) {
+        if (!bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException(INVALID_USERNAME_PASSWORD);
         }
 
-        String jwt = jwtService.generateJWT(user.getE(), user.getRole());
+        String jwt = jwtService.generateJWT(user.getEmail(), user.getRole());
         String refreshToken = UUID.randomUUID().toString();
 
         user.setRefreshToken(refreshToken);
@@ -85,12 +85,12 @@ public class UserController {
         String email = jwtService.validateJWTAndGetUsername(request.getJwt(), true);
         if (email == null || email.isEmpty()) throw new RuntimeException(INVALID_REQUEST);
 
-        User user = userRepository.getUserByEIgnoreCase(email);
+        User user = userRepository.getUserByEmailIgnoreCase(email);
         if (user == null) throw new RuntimeException(INVALID_REQUEST);
 
         if (!user.getRefreshToken().equals(request.getRefreshToken())) throw new RuntimeException("Invalid refresh token.");
 
-        String jwt = jwtService.generateJWT(user.getE(), user.getRole());
+        String jwt = jwtService.generateJWT(user.getEmail(), user.getRole());
         String refreshToken = UUID.randomUUID().toString();
 
         user.setRefreshToken(refreshToken);

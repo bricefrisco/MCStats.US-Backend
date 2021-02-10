@@ -1,15 +1,27 @@
 package us.mcstats.serverstats.database.repository;
 
-import org.springframework.data.mongodb.repository.DeleteQuery;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import us.mcstats.serverstats.database.entities.Timeseries;
+import us.mcstats.serverstats.models.timeseries.TimeseriesDto;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.util.List;
 
-public interface TimeseriesRepository extends MongoRepository<Timeseries, Timeseries.CompositeKey> {
-    @DeleteQuery(value="{ '_id.t': {'$lte': ?0 } }")
-    Long deleteAllRecordsBefore(LocalDateTime date);
+public interface TimeseriesRepository extends JpaRepository<Timeseries, Timeseries.CompositeId> {
+    Long deleteAllByIdServerName(String serverName);
 
-    @DeleteQuery(value="{ '_id.n': ?0 }")
-    Long deleteRecordsByServerName(String name);
+    @Query(value = "SELECT time_bucket((INTERVAL '1 second' * :interval), time) AS t," +
+            "ceil(avg(num_online_players)) AS o " +
+            "FROM timeseries " +
+            "WHERE server_name = :serverName " +
+            "AND time <= :lt AND time >= :gt " +
+            "GROUP BY t", nativeQuery = true)
+    List<TimeseriesDto> selectBetween(
+            @Param("serverName") String serverName,
+            @Param("lt") Timestamp lt,
+            @Param("gt") Timestamp gt,
+            @Param("interval") Integer interval
+    );
 }

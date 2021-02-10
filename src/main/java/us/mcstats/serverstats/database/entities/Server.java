@@ -1,32 +1,35 @@
 package us.mcstats.serverstats.database.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Field;
+import lombok.*;
+import javax.persistence.*;
 
+@Entity
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@ToString
+@Table(name = "servers")
 public class Server {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "name")
     private String name;
 
-    @Field(name = "a")
+    @Column(name = "address")
     private String address;
 
-    @Field(name = "i")
+    @Column(name = "image")
     private String image;
 
-    @Field(name = "d")
+    @Column(name="description")
     private String description;
 
-    @Field(name = "p")
+    @Column(name = "online_players")
     private Integer players;
 
-    @Field(name = "pm")
-    private Integer maxPlayers;
+    @Column(name = "peak_players")
+    private Integer peakPlayers;
+
 }

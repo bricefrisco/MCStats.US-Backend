@@ -14,7 +14,6 @@ import us.mcstats.serverstats.models.GenericResponse;
 import us.mcstats.serverstats.models.servers.*;
 import us.mcstats.serverstats.pinger.Pinger;
 import us.mcstats.serverstats.services.JWTService;
-import us.mcstats.serverstats.services.ServerService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,14 +23,12 @@ import java.util.stream.Collectors;
 public class ServerController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerController.class);
 
-    private final ServerService serverService;
     private final JWTService jwtService;
     private final ServerRepository serverRepository;
     private final TimeseriesRepository timeseriesRepository;
     private final Pinger pinger;
 
-    public ServerController(ServerService serverService, JWTService jwtService, ServerRepository serverRepository, TimeseriesRepository timeseriesRepository, Pinger pinger) {
-        this.serverService = serverService;
+    public ServerController(JWTService jwtService, ServerRepository serverRepository, TimeseriesRepository timeseriesRepository, Pinger pinger) {
         this.jwtService = jwtService;
         this.serverRepository = serverRepository;
         this.timeseriesRepository = timeseriesRepository;
@@ -114,7 +111,7 @@ public class ServerController {
 
         Server server = getServerIfExists(request.getName());
         serverRepository.delete(server);
-        Long recordsRemoved = timeseriesRepository.deleteRecordsByServerName(request.getName());
+        Long recordsRemoved = timeseriesRepository.deleteAllByIdServerName(request.getName());
         pinger.removeThread(server);
 
         return new GenericResponse("Successfully deleted server '" + request.getName() + "' and " + recordsRemoved + " records.");
@@ -123,7 +120,7 @@ public class ServerController {
     @GetMapping("/stats")
     public StatsResponse getTotalPlayers() {
         LOGGER.info("GET /stats");
-        return new StatsResponse(serverRepository.count(), serverService.fetchTotalPlayers());
+        return new StatsResponse(serverRepository.count(), serverRepository.getTotalPlayersOnline());
     }
 
 
