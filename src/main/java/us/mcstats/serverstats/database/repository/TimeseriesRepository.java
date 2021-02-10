@@ -17,7 +17,8 @@ public interface TimeseriesRepository extends JpaRepository<Timeseries, Timeseri
             "FROM timeseries " +
             "WHERE server_name = :serverName " +
             "AND time <= :lt AND time >= :gt " +
-            "GROUP BY t", nativeQuery = true)
+            "GROUP BY t " +
+            "ORDER BY t", nativeQuery = true)
     List<TimeseriesDto> selectBetween(
             @Param("serverName") String serverName,
             @Param("lt") Timestamp lt,
