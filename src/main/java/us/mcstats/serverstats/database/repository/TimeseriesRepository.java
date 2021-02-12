@@ -6,10 +6,12 @@ import org.springframework.data.repository.query.Param;
 import us.mcstats.serverstats.database.entities.Timeseries;
 import us.mcstats.serverstats.models.timeseries.TimeseriesDto;
 
+import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.List;
 
 public interface TimeseriesRepository extends JpaRepository<Timeseries, Timeseries.CompositeId> {
+    @Transactional
     Long deleteAllByIdServerName(String serverName);
 
     @Query(value = "SELECT time_bucket((INTERVAL '1 second' * :interval), time) AS t," +
