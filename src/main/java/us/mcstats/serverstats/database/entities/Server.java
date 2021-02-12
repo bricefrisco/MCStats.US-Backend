@@ -2,6 +2,7 @@ package us.mcstats.serverstats.database.entities;
 
 import lombok.*;
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Getter
@@ -31,5 +32,8 @@ public class Server {
 
     @Column(name = "peak_players")
     private Integer peakPlayers;
+
+    @Column(name = "peak_players_time")
+    private Timestamp peakPlayersTime;
 
 }

@@ -29,7 +29,6 @@ public class PingerThread extends Thread {
     @SneakyThrows
     public void run() {
         int rand = new Random().nextInt(60) + 1;
-        LOGGER.info("Sleeping initially for " + rand + " seconds");
         Thread.sleep(rand * 1000);
 
         boolean updatedMetaData = false;
@@ -52,7 +51,13 @@ public class PingerThread extends Thread {
                 }
 
                 server.setPlayers(response.getPlayers().getOnline());
-//                server.setMaxPlayers(response.getPlayers().getMax());
+
+                Integer max = server.getPeakPlayers();
+                int curr = response.getPlayers().getOnline();
+                if (max == null || max < curr) {
+                    server.setPeakPlayers(curr);
+                    server.setPeakPlayersTime(new Timestamp(System.currentTimeMillis()));
+                }
 
                 serverRepository.save(server);
                 repository.save(timeseries);
