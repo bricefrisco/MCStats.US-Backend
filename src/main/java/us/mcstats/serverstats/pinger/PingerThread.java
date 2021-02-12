@@ -44,9 +44,6 @@ public class PingerThread extends Thread {
                 timeseries.setId(key);
                 timeseries.setNumPlayersOnline(response.getPlayers().getOnline());
 
-                LOGGER.info("Pinged server " + server.getName() + " (players online: " + response.getPlayers().getOnline() + ") saving timeseries: " + timeseries.toString());
-
-
                 if (!updatedMetaData) {
                     LOGGER.info("Updating meta data for server '" + server.getName() + "'");
                     server.setImage(response.getFavicon());

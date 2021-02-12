@@ -19,7 +19,6 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class TimeseriesController {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeseriesController.class);
-    private static final String INTERVAL_STRING = "'%d seconds'";
     private static final int MAX_RESULTS = 100;
     private final TimeseriesRepository timeseriesRepository;
 
@@ -39,11 +38,7 @@ public class TimeseriesController {
         // Time-series interval calculated by difference in milliseconds divided by the max results we would like
         long interval = ms / MAX_RESULTS;
 
-        LOGGER.info("Interval in milliseconds: " + interval);
-
         int intervalInSeconds = (int) Math.ceil(interval / 1000.0);
-
-        LOGGER.info("Interval in seconds: " + intervalInSeconds);
 
         return timeseriesRepository.selectBetween(
                 serverName,
