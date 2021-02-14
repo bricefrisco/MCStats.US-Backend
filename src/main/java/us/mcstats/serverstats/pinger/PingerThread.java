@@ -59,10 +59,16 @@ public class PingerThread extends Thread {
                     server.setPeakPlayersTime(new Timestamp(System.currentTimeMillis()));
                 }
 
+                server.setPingSuccessful(Boolean.TRUE);
+                server.setPingErrorReason(null);
+
                 serverRepository.save(server);
                 repository.save(timeseries);
             } catch (Exception e) {
                 LOGGER.info("Failed to ping " + server.getAddress() + " - " + e.getMessage());
+                server.setPingSuccessful(Boolean.FALSE);
+                server.setPingErrorReason(e.getMessage());
+                serverRepository.save(server);
             } finally {
                 Thread.sleep(60 * 1000);
             }
