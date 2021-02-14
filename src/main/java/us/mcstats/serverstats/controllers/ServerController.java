@@ -20,6 +20,7 @@ import us.mcstats.serverstats.ping.MCPingResponse;
 import us.mcstats.serverstats.pinger.Pinger;
 import us.mcstats.serverstats.services.JWTService;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,6 +105,9 @@ public class ServerController {
         server = new Server();
         server.setName(request.getName());
         server.setAddress(request.getAddress());
+        server.setPlayers(0);
+        server.setPeakPlayers(0);
+        server.setPeakPlayersTime(new Timestamp(System.currentTimeMillis()));
 
         serverRepository.save(server);
         pinger.addThread(server);
