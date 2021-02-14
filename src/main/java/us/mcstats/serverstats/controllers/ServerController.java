@@ -8,10 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import us.mcstats.serverstats.database.entities.Server;
+import us.mcstats.serverstats.database.entities.ServerRequest;
 import us.mcstats.serverstats.database.repository.ServerRepository;
+import us.mcstats.serverstats.database.repository.ServerRequestRepository;
 import us.mcstats.serverstats.database.repository.TimeseriesRepository;
 import us.mcstats.serverstats.models.GenericResponse;
+import us.mcstats.serverstats.models.exceptions.InvalidPingException;
 import us.mcstats.serverstats.models.servers.*;
+import us.mcstats.serverstats.ping.MCPing;
+import us.mcstats.serverstats.ping.MCPingResponse;
 import us.mcstats.serverstats.pinger.Pinger;
 import us.mcstats.serverstats.services.JWTService;
 
@@ -26,12 +31,14 @@ public class ServerController {
     private final JWTService jwtService;
     private final ServerRepository serverRepository;
     private final TimeseriesRepository timeseriesRepository;
+    private final ServerRequestRepository serverRequestRepository;
     private final Pinger pinger;
 
-    public ServerController(JWTService jwtService, ServerRepository serverRepository, TimeseriesRepository timeseriesRepository, Pinger pinger) {
+    public ServerController(JWTService jwtService, ServerRepository serverRepository, TimeseriesRepository timeseriesRepository, ServerRequestRepository serverRequestRepository, Pinger pinger) {
         this.jwtService = jwtService;
         this.serverRepository = serverRepository;
         this.timeseriesRepository = timeseriesRepository;
+        this.serverRequestRepository = serverRequestRepository;
         this.pinger = pinger;
     }
 
@@ -58,6 +65,31 @@ public class ServerController {
         LOGGER.info("GET /server-names");
         List<Server> servers = serverRepository.findAll();
         return servers.stream().map(Server::getName).sorted().collect(Collectors.toList());
+    }
+
+    @PostMapping("/new-server-requests")
+    public GenericResponse addServerRequest(@RequestBody AddServerRequest request) {
+        LOGGER.info("POST /new-server-requests - " + request);
+        if (!request.isValid()) throw new RuntimeException("Invalid server or address.");
+
+        MCPingResponse res;
+        try {
+            res = MCPing.getPing(request.getAddress());
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to ping server - " + e.getMessage());
+        }
+
+        if (res.getPlayers().getOnline() < 50) {
+            throw new InvalidPingException("Server must have at least 50 players online (has " + res.getPlayers().getOnline() + ").");
+        }
+
+        ServerRequest serverRequest = new ServerRequest();
+        serverRequest.setName(request.getName());
+        serverRequest.setIp(request.getAddress());
+        serverRequestRepository.saveAndFlush(serverRequest);
+        return new GenericResponse("Ping successful (players online: " + res.getPlayers().getOnline() + ").\n" +
+                "This server has been submitted for review to ensure the name and IP is appropriate.\n" +
+                "Reviews typically take up to 48 hours to complete. After approval, the server will be added to the site.");
     }
 
     @PostMapping("/servers")

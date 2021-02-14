@@ -14,11 +14,9 @@ import java.sql.Timestamp;
 public class ControllerAdvice {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllerAdvice.class);
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse onRuntimeException(RuntimeException e) {
-        LOGGER.error("Error occurred", e);
-
+    public ErrorResponse onRuntimeException(Exception e) {
         return new ErrorResponse(
                 new Timestamp(System.currentTimeMillis()),
                 HttpStatus.BAD_REQUEST.value(),
