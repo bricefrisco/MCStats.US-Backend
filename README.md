@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="https://i.imgur.com/hprX8oH.png">
+	<img src="https://i.imgur.com/ljRHf6Z.png">
 </p>
 
 # MCStats : back-end
