@@ -10,6 +10,8 @@ public class AddServerRequest {
     private String address;
 
     public boolean isValid() {
-        return name != null && address != null && !name.isBlank() && !address.isBlank();
+        if (name == null || address == null) return false;
+        if (name.isBlank() || address.isBlank()) return false;
+        return address.contains(".");
     }
 }
