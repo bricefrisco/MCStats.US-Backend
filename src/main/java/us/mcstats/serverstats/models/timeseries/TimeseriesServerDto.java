@@ -18,5 +18,6 @@ public class TimeseriesServerDto {
     private Integer onlinePlayers;
     private Integer peakPlayers;
     private Timestamp peakPlayersTime;
+    private Boolean pingSuccessful;
     List<TimeseriesDto> timeseries;
 }

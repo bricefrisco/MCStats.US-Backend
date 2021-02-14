@@ -63,6 +63,7 @@ public class TimeseriesController {
             dto.setOnlinePlayers(server.getPlayers());
             dto.setPeakPlayers(server.getPeakPlayers());
             dto.setPeakPlayersTime(server.getPeakPlayersTime());
+            dto.setPingSuccessful(server.getPingSuccessful());
 
             dto.setTimeseries(fetchTimeseries(server.getName(), lt, gt));
 
