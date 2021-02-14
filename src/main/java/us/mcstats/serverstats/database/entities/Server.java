@@ -36,4 +36,9 @@ public class Server {
     @Column(name = "peak_players_time")
     private Timestamp peakPlayersTime;
 
+    @Column(name = "ping_successful")
+    private Boolean pingSuccessful;
+
+    @Column(name = "ping_error_reason")
+    private String pingErrorReason;
 }
